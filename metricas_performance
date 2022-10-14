@@ -1,10 +1,56 @@
+pacman::p_load(ade4, car, caret, corrplot, data.table, dplyr, forcats, funModeling, ggplot2, mlbench, mltools, randomForest, rattle, tidyverse)
+
+# empenhos contratos covid19 
+empenhos_covid19 <- fread('https://dados.sc.gov.br/dataset/4b3d481c-0f57-4443-8e95-a13a49746c0d/resource/aa687a73-92fc-4d49-926a-c3f83f3aed85/download/empenhos_contratos.csv')
+
+empenhos_covid19_D <- acm.disjonctif(as.data.frame(empenhos_covid19$NUPRAZO))
+
+empenhos_covid19 <- cbind(empenhos_covid19, empenhos_covid19_D)
+
+# AED 
+status(empenhos_covid19) 
+freq(empenhos_covid19) 
+plot_num(empenhos_covid19) 
+profiling_num(empenhos_covid19) 
+
+#correlação
+corrplot(cor(empenhos_covid19[ , c(1:500)])) 
+
+# Treino e Teste: Pré-processamento
+particao_empenhos_covid19 = createDataPartition(empenhos_covid19$NUPRAZO, p=.7, list = F) 
+treino_empenhos_covid19 = empenhos_covid19[particao_empenhos_covid19, ] 
+teste_empenhos_covid19 = empenhos_covid19[-particao_empenhos_covid19, ]
+
+# Controle de treinamento
+train.control <- trainControl(method = "cv", number = 10, verboseIter = T)
+
+## Regressão Linear
+empenhos_covid19_LM <- train(DETIPOCONTRATO ~ Outros, Aquisição, Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "lm", trControl = train.control)
+summary(empenhos_covid19_LM)
+plot(varImp(empenhos_covid19_LM))
+
+## Árvore de Decisão
+empenhos_covid19_RPART <- train(DETIPOCONTRATO ~ Outros, Aquisição, Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "rpart", trControl = train.control)
+summary(empenhos_covid19_RPART)
+fancyRpartPlot(empenhos_covid19_RPART$finalModel) 
+plot(varImp(empenhos_covid19_RPART)) 
+
+# Bagging com Floresta Aleatória
+empenhos_covid19_RF <- train(DETIPOCONTRATO ~ Outros, Aquisição, Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "cforest", trControl = train.control)
+plot(empenhos_covid19_RF) 
+plot(varImp(empenhos_covid19_RF)) 
+
+# Boosting com Boosted
+empenhos_covid19_ADA <- train(DETIPOCONTRATO ~ Outros, Aquisição, Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "glmboost", trControl = train.control)
+plot(empenhos_covid19_ADA) 
+print(empenhos_covid19_ADA) 
+summary(empenhos_covid19_ADA) 
+
+melhor_modelo <- resamples(list(LM = empenhos_covid19_LM, RPART = empenhos_covid19_RPART, RF = empenhos_covid19_RF, ADABOOST = empenhos_covid19_ADA))
+melhor_modelo
+
 plot(erros1 <- c(rep(2,10)))
 plot(erros2 <- c(rep(1,5), rep(3,5)))
 plot(erros3 <- c(rep(0,8), rep(10,2)))
 lista_erros <- matrix(c(sum(erros1)/10,sum(erros2)/10, sum(erros3)/10, sqrt(sum(erros1^2)/10), sqrt(sum(erros2^2)/10), sqrt(sum(erros3^2)/10)), ncol = 2, dimnames = list(c('Erros 1', 'Erros 2', 'Erros 3'), c('MAE', 'RMSE')))
 lista_erros
-
-melhor_modelo <- resamples(list(LM = empenhos_covid19_LM, RPART = empenhos_covid19_RPART, RF = empenhos_covid19_RF, ADABOOST = empenhos_covid19_ADA))
-melhor_modelo
-
-summary(melhor_modelo)
