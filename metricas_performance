@@ -25,23 +25,23 @@ teste_empenhos_covid19 = empenhos_covid19[-particao_empenhos_covid19, ]
 train.control <- trainControl(method = "cv", number = 10, verboseIter = T)
 
 ## Regressão Linear
-empenhos_covid19_LM <- train(DETIPOCONTRATO ~ Outros, Aquisição, Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "lm", trControl = train.control)
+empenhos_covid19_LM <- train(DETIPOCONTRATO ~ Outros + Aquisição + Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "lm", trControl = train.control)
 summary(empenhos_covid19_LM)
 plot(varImp(empenhos_covid19_LM))
 
 ## Árvore de Decisão
-empenhos_covid19_RPART <- train(DETIPOCONTRATO ~ Outros, Aquisição, Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "rpart", trControl = train.control)
+empenhos_covid19_RPART <- train(DETIPOCONTRATO ~ Outros + Aquisição + Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "rpart", trControl = train.control)
 summary(empenhos_covid19_RPART)
 fancyRpartPlot(empenhos_covid19_RPART$finalModel) 
 plot(varImp(empenhos_covid19_RPART)) 
 
 # Bagging com Floresta Aleatória
-empenhos_covid19_RF <- train(DETIPOCONTRATO ~ Outros, Aquisição, Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "cforest", trControl = train.control)
+empenhos_covid19_RF <- train(DETIPOCONTRATO ~ Outros + Aquisição + Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "cforest", trControl = train.control)
 plot(empenhos_covid19_RF) 
 plot(varImp(empenhos_covid19_RF)) 
 
 # Boosting com Boosted
-empenhos_covid19_ADA <- train(DETIPOCONTRATO ~ Outros, Aquisição, Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "glmboost", trControl = train.control)
+empenhos_covid19_ADA <- train(DETIPOCONTRATO ~ Outros + Aquisição + Serviços + TDI_03 + MHA_03, data = treino_empenhos_covid19, method = "glmboost", trControl = train.control)
 plot(empenhos_covid19_ADA) 
 print(empenhos_covid19_ADA) 
 summary(empenhos_covid19_ADA) 
