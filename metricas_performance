@@ -14,7 +14,7 @@ plot_num(empenhos_covid19)
 profiling_num(empenhos_covid19) 
 
 #correlação
-corrplot(cor(empenhos_covid19[ , c(1:500)])) 
+corrplot(cor(empenhos_covid19[ , c(1:138)])) 
 
 # Treino e Teste: Pré-processamento
 particao_empenhos_covid19 = createDataPartition(empenhos_covid19$NUPRAZO, p=.7, list = F) 
